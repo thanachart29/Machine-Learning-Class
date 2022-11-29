@@ -1,7 +1,8 @@
 import pandas as pd
+from sklearn.preprocessing import MinMaxScaler
+from sklearn.cluster import KMeans
+from sklearn.metrics import silhouette_score
 
-
-# def extactTeamfightDataframe(teamfight_player_df:pd.DataFrame, match_id):
 def extactTeamfightDataframe(select_match:pd.DataFrame):
     feature_list = ['delta_gold', 'delta_xp']
     sum_data = {}
@@ -9,7 +10,6 @@ def extactTeamfightDataframe(select_match:pd.DataFrame):
         sum_data.update({'radiant_total_'+str(i):[],
                             'dire_total_'+str(i):[]})
 
-    # select_match = teamfight_player_df.loc[teamfight_player_df['match_id']==match_id]
     fight_num = int((select_match.shape[0])/10)
     for j in range(fight_num):
         one_teamfight = select_match.iloc[(10*j):(10*(j+1)),:]
@@ -34,3 +34,12 @@ def extactStatDatafram(select_match:pd.DataFrame):
         sum_data['radiant_total_'+str(j)].append(radiant[j].sum())
         sum_data['dire_total_'+str(j)].append(dire[j].sum())
     return sum_data
+
+def clusterKMean(scale_df:pd.DataFrame, i:int):
+    res = {}
+    model = KMeans(n_clusters=i, max_iter=1000 , random_state=1)
+    model.fit(scale_df)
+    res.update({i:{'model':model,
+                    'WCSS':model.inertia_,
+                    'silhouette_score':silhouette_score(scale_df, model.labels_)}})
+    return res
